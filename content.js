@@ -1,46 +1,55 @@
-const TERM_REGEX = /(Jamie Cai|Jamie|Cai)/gi;
+const TERM_REGEX = /(?<=^|\b)(Jamie Cai|Jamie|Cai)(?=$|\b)/gi;
 
-function findNodesWithUnwantedTerm(node, result) {
-  if (!node) return;
+function containsUnwantedTerm(text) {
+  const cleanText = (text || '').trim().toLowerCase();
+  TERM_REGEX.lastIndex = 0;
+  return TERM_REGEX.test(cleanText);
+}
+
+function findNodesWithUnwantedTerm(node, result = { textNodes: [], titleNodes: []}) {
+  if (!node) return result;
   if (node.nodeType === Node.TEXT_NODE) {
-    if (!node.textContent) return;
-    let cleanTextContent = node.textContent.trim().toLowerCase();
-    if (
-      cleanTextContent.includes("jamie cai")
-      || cleanTextContent === 'jamie'
-      || cleanTextContent === 'cai'
-      || cleanTextContent === 'cai\'s'
-    ) {
-      result.push(node);
+    if (!node.textContent) return result;
+    if (containsUnwantedTerm(node.textContent)) {
+      result.textNodes.push(node);
     }
-    return;
+    return result;
   }
-  if (!node.innerText) return;
-  const cleanInnerText = node.innerText.trim().toLowerCase();
-  if (
-    cleanInnerText !== 'jamie'
-    && cleanInnerText !== 'cai'
-    && cleanInnerText !== 'cai\'s'
-    && !cleanInnerText.includes("jamie cai")
-  ) {
-    return;
+  if (containsUnwantedTerm(node.innerText)) {
+    for (let index = 0; index < node.childNodes.length; index++) {
+      const childNode = node.childNodes[index];
+      findNodesWithUnwantedTerm(childNode, result)
+    }
   }
-  for (let index = 0; index < node.childNodes.length; index++) {
-    const childNode = node.childNodes[index];
-    findNodesWithUnwantedTerm(childNode, result)
+  if (containsUnwantedTerm(node.title)) {
+    result.titleNodes.push(node);
   }
+  return result;
 }
 
 function removeUndesiredTerms() {
-  const foundNodes = [];
-  findNodesWithUnwantedTerm(document.body, foundNodes);
-  replaceNodesWithCalmingText(foundNodes);
+  const result = findNodesWithUnwantedTerm(document.body);
+  replaceTextContent(result.textNodes);
+  replaceTitleContent(result.titleNodes);
+  replacePageTitle();
 }
 
-function replaceNodesWithCalmingText(nodes) {
+function replacePageTitle() {
+  TERM_REGEX.lastIndex = 0;
+  document.title = document.title.replaceAll(TERM_REGEX, "Anonymous");
+}
+
+function replaceTextContent(nodes) {
   for (const node of nodes) {
-    debugger;
-    node.textContent = node.textContent.replaceAll(/(Jamie Cai|Jamie|Cai)/gi, "Anonymous");
+    TERM_REGEX.lastIndex = 0;
+    node.textContent = node.textContent.replaceAll(TERM_REGEX, "Anonymous");
+  }
+}
+
+function replaceTitleContent(nodes) {
+  for (const node of nodes) {
+    TERM_REGEX.lastIndex = 0;
+    node.title = node.title.replaceAll(TERM_REGEX, "Anonymous");
   }
 }
 
