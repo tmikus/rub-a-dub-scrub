@@ -20,13 +20,10 @@ function containsFullMatch(text) {
   return FULL_NAME_REGEX.test(cleanText);
 }
 
-function containsUnwantedTerm(text, distanceFromLastFullMatch) {
+function containsUnwantedTerm(text) {
   const cleanText = (text || '').trim();
   EMAIL_REGEX.lastIndex = 0;
   if (EMAIL_REGEX.test(cleanText)) return true;
-  if (distanceFromLastFullMatch > ACCEPTABLE_DISTANCE_FROM_LAST_MATCH) {
-    return false;
-  }
   TERM_REGEX.lastIndex = 0;
   return TERM_REGEX.test(cleanText);
 }
@@ -37,9 +34,12 @@ function findNodesWithUnwantedTerm(
   distanceFromLastFullMatch = 0,
 ) {
   if (!node) return result;
+  if (distanceFromLastFullMatch > ACCEPTABLE_DISTANCE_FROM_LAST_MATCH) {
+    return result;
+  }
   if (node.nodeType === Node.TEXT_NODE) {
     if (!node.textContent) return result;
-    if (containsUnwantedTerm(node.textContent, distanceFromLastFullMatch)) {
+    if (containsUnwantedTerm(node.textContent)) {
       result.textNodes.push(node);
     }
     return result;
@@ -47,7 +47,7 @@ function findNodesWithUnwantedTerm(
   if (containsFullMatch(node.innerText)) {
     distanceFromLastFullMatch = 0;
   }
-  if (containsUnwantedTerm(node.innerText, distanceFromLastFullMatch)) {
+  if (containsUnwantedTerm(node.innerText)) {
     for (let index = 0; index < node.childNodes.length; index++) {
       const childNode = node.childNodes[index];
       findNodesWithUnwantedTerm(childNode, result, distanceFromLastFullMatch + 1)
