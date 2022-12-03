@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Rub-a-Dub Scrub",
+  "version": "1.0.0",
+  "author": "Tomasz Mikus",
+  "content_scripts": [
+    {
+      "matches": ["*"],
+      "js": ["content.js"]
+    }
+  ]
+}
