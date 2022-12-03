@@ -1,29 +1,47 @@
-function cleanUpElementWithFullName(node) {
-  if (!node.textContent) return;
-  node.textContent = node.textContent.replace('Jamie Cai', 'Anonymous');
-}
+const TERM_REGEX = /(Jamie Cai|Jamie|Cai)/gi;
 
-function cleanUpElementsWithFullName() {
-  forEachElementWithFullName(cleanUpElementWithFullName);
-}
-
-function forEachElementWithFullName(callback) {
-  const xpath = "//*[contains(text(), 'Jamie Cai')]";
-  const matchingElement = document.evaluate(
-    xpath,
-    document,
-    null,
-    XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-    null,
-  );
-  for (let itemIndex = 0; itemIndex < matchingElement.snapshotLength; itemIndex++) {
-    const item = matchingElement.snapshotItem(itemIndex);
-    callback(item);
+function findNodesWithUnwantedTerm(node, result) {
+  if (!node) return;
+  if (node.nodeType === Node.TEXT_NODE) {
+    if (!node.textContent) return;
+    let cleanTextContent = node.textContent.trim().toLowerCase();
+    if (
+      cleanTextContent.includes("jamie cai")
+      || cleanTextContent === 'jamie'
+      || cleanTextContent === 'cai'
+      || cleanTextContent === 'cai\'s'
+    ) {
+      result.push(node);
+    }
+    return;
+  }
+  if (!node.innerText) return;
+  const cleanInnerText = node.innerText.trim().toLowerCase();
+  if (
+    cleanInnerText !== 'jamie'
+    && cleanInnerText !== 'cai'
+    && cleanInnerText !== 'cai\'s'
+    && !cleanInnerText.includes("jamie cai")
+  ) {
+    return;
+  }
+  for (let index = 0; index < node.childNodes.length; index++) {
+    const childNode = node.childNodes[index];
+    findNodesWithUnwantedTerm(childNode, result)
   }
 }
 
 function removeUndesiredTerms() {
-  cleanUpElementsWithFullName();
+  const foundNodes = [];
+  findNodesWithUnwantedTerm(document.body, foundNodes);
+  replaceNodesWithCalmingText(foundNodes);
+}
+
+function replaceNodesWithCalmingText(nodes) {
+  for (const node of nodes) {
+    debugger;
+    node.textContent = node.textContent.replaceAll(/(Jamie Cai|Jamie|Cai)/gi, "Anonymous");
+  }
 }
 
 removeUndesiredTerms();
