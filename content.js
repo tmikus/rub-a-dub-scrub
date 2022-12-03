@@ -1,13 +1,14 @@
 function cleanUpElementWithFullName(node) {
-
+  if (!node.textContent) return;
+  node.textContent = node.textContent.replace('Jamie Cai', 'Anonymous');
 }
 
 function cleanUpElementsWithFullName() {
-  forEachElementWithFullName(cleanUpElementWithFullName)
+  forEachElementWithFullName(cleanUpElementWithFullName);
 }
 
 function forEachElementWithFullName(callback) {
-  const xpath = "//[text()='Jamie Cai']";
+  const xpath = "//*[contains(text(), 'Jamie Cai')]";
   const matchingElement = document.evaluate(
     xpath,
     document,
