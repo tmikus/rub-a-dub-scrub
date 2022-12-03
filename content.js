@@ -1,4 +1,5 @@
 const TERM_REGEX = /(?<=^|\b)(Jamie Cai|Jamie|Cai)(?=$|\b)/gi;
+const SAFE_TERM = 'Anonymous';
 
 function containsUnwantedTerm(text) {
   const cleanText = (text || '').trim().toLowerCase();
@@ -36,20 +37,20 @@ function removeUndesiredTerms() {
 
 function replacePageTitle() {
   TERM_REGEX.lastIndex = 0;
-  document.title = document.title.replaceAll(TERM_REGEX, "Anonymous");
+  document.title = document.title.replaceAll(TERM_REGEX, SAFE_TERM);
 }
 
 function replaceTextContent(nodes) {
   for (const node of nodes) {
     TERM_REGEX.lastIndex = 0;
-    node.textContent = node.textContent.replaceAll(TERM_REGEX, "Anonymous");
+    node.textContent = node.textContent.replaceAll(TERM_REGEX, SAFE_TERM);
   }
 }
 
 function replaceTitleContent(nodes) {
   for (const node of nodes) {
     TERM_REGEX.lastIndex = 0;
-    node.title = node.title.replaceAll(TERM_REGEX, "Anonymous");
+    node.title = node.title.replaceAll(TERM_REGEX, SAFE_TERM);
   }
 }
 
