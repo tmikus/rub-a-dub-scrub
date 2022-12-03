@@ -5,8 +5,10 @@
   "author": "Tomasz Mikus",
   "content_scripts": [
     {
+      "all_frames": true,
       "matches": ["*"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_start"
     }
   ]
 }
